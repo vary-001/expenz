@@ -16,7 +16,7 @@ const startServer = async () => {
       console.log(`🚀 Mode:    ${env.NODE_ENV}`);
       console.log(`🌐 Port:    ${env.PORT}`);
       console.log(`🔗 URL:     http://localhost:${env.PORT}`);
-      console.log(`💚 Health:  http://localhost:${env.PORT}/api/health`);
+      console.log(`🙂‍↔️ Health:  http://localhost:${env.PORT}/api/health`);
       console.log('');
     });
 

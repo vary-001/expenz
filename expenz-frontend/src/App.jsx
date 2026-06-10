@@ -8,7 +8,7 @@ import { useAuth } from './hooks/useAuth';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import Transactions from './pages/Transactions';
+import Expenses from './pages/Expenses';
 import Budget from './pages/Budget';
 import Income from './pages/Income';
 import Reports from './pages/Reports';
@@ -39,9 +39,9 @@ function AppRoutes() {
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="transactions" element={<Transactions />} />
-        <Route path="budget" element={<Budget />} />
+        <Route path="expenses" element={<Expenses />} />
         <Route path="income" element={<Income />} />
+        <Route path="budget" element={<Budget />} />
         <Route path="reports" element={<Reports />} />
         <Route path="archives" element={<Archives />} />
         <Route path="settings" element={<Settings />} />

@@ -1,6 +1,6 @@
 // src/controllers/budgetController.js
 const Budget = require('../models/Budget');
-const Transaction = require('../models/Transaction');
+const Expense = require('../models/Expense');
 const { success, error } = require('../utils/apiResponse');
 
 /**
