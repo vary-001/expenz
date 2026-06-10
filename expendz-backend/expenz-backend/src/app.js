@@ -5,32 +5,46 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 
 const env = require('./config/env');
+
+// Import all routes
 const authRoutes = require('./routes/authRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
+const incomeRoutes = require('./routes/incomeRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
+const archiveRoutes = require('./routes/archiveRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-// Security
-app.use(helmet());
+// ─── SECURITY ───
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 
-// CORS - allow our frontend
-app.use(
-  cors({
-    origin: env.CLIENT_URL,
-    credentials: true,
-  })
-);
+// ─── CORS (allow browser & Postman to call our API) ───
+app.use(cors({
+  origin: '*', // Allow all origins for development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+}));
 
-// Body parser
+// Handle preflight requests for all routes
+app.options('*', cors());
+
+// ─── BODY PARSER ───
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Logging
+// ─── LOGGING ───
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Health check
+// ─── HEALTH CHECK ───
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -41,19 +55,34 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API Routes
+// ─── API ROUTES ───
 app.use('/api/auth', authRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/income', incomeRoutes);
+app.use('/api/budgets', budgetRoutes);
+app.use('/api/archives', archiveRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
-// Root
+// ─── ROOT ───
 app.get('/', (req, res) => {
   res.json({
     name: 'Expenz API',
     version: '1.0.0',
-    docs: '/api/health',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      transactions: '/api/transactions',
+      income: '/api/income',
+      budgets: '/api/budgets',
+      archives: '/api/archives',
+      reports: '/api/reports',
+      dashboard: '/api/dashboard',
+    },
   });
 });
 
-// 404 + Error handler (must be last)
+// ─── ERROR HANDLING (must be last) ───
 app.use(notFound);
 app.use(errorHandler);
 

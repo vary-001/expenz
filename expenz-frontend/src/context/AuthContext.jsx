@@ -22,23 +22,25 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const res = await API.post('/auth/login', { email, password });
-    const { token, user: userData } = res.data;
-    localStorage.setItem('expenz_token', token);
-    localStorage.setItem('expenz_user', JSON.stringify(userData));
-    setUser(userData);
-    return userData;
-  };
+  // src/context/AuthContext.jsx - UPDATED login & register methods
 
-  const register = async (name, email, password) => {
-    const res = await API.post('/auth/register', { name, email, password });
-    const { token, user: userData } = res.data;
-    localStorage.setItem('expenz_token', token);
-    localStorage.setItem('expenz_user', JSON.stringify(userData));
-    setUser(userData);
-    return userData;
-  };
+const login = async (email, password) => {
+  const res = await API.post('/auth/login', { email, password });
+  const { token, user: userData } = res.data.data;  // ← Note: res.data.data
+  localStorage.setItem('expenz_token', token);
+  localStorage.setItem('expenz_user', JSON.stringify(userData));
+  setUser(userData);
+  return userData;
+};
+
+const register = async (name, email, password) => {
+  const res = await API.post('/auth/register', { name, email, password });
+  const { token, user: userData } = res.data.data;  // ← Note: res.data.data
+  localStorage.setItem('expenz_token', token);
+  localStorage.setItem('expenz_user', JSON.stringify(userData));
+  setUser(userData);
+  return userData;
+};
 
   const logout = useCallback(() => {
     localStorage.removeItem('expenz_token');

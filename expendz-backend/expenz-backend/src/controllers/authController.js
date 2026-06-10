@@ -111,4 +111,40 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getMe, logout };
+const updateProfile = async (req, res, next) => {
+  try {
+    const { name, email, currency, currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) return error(res, 404, 'User not found');
+
+    // Password change
+    if (newPassword) {
+      if (!currentPassword) return error(res, 400, 'Current password is required');
+
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) return error(res, 401, 'Current password is incorrect');
+
+      if (newPassword.length < 6) {
+        return error(res, 400, 'New password must be at least 6 characters');
+      }
+
+      user.password = newPassword;
+    }
+
+    // Profile fields
+    if (name) user.name = name.trim();
+    if (email) user.email = email.toLowerCase().trim();
+    if (currency) user.currency = currency.toUpperCase();
+
+    await user.save();
+
+    return success(res, 200, 'Profile updated successfully', {
+      user: user.toSafeObject(),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, getMe, logout, updateProfile };

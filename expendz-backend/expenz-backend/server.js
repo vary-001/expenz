@@ -11,7 +11,7 @@ const startServer = async () => {
     const server = app.listen(env.PORT, () => {
       console.log('');
       console.log('╔════════════════════════════════════════╗');
-      console.log('║   🌿  EXPENZ Backend Server Running    ║');
+      console.log('║     EXPENZ Backend Server Running    ║');
       console.log('╚════════════════════════════════════════╝');
       console.log(`🚀 Mode:    ${env.NODE_ENV}`);
       console.log(`🌐 Port:    ${env.PORT}`);

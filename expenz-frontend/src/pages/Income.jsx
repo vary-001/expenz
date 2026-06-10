@@ -24,7 +24,9 @@ const Income = () => {
   const fetchIncomes = useCallback(async () => {
     try {
       const res = await request('get', '/income');
-      setIncomes(res.incomes || res || []);
+      // API returns { success, status, message, data: { incomes: [...] } }
+      const payload = res?.data || res || {};
+      setIncomes(payload.incomes || []);
     } catch {} finally {
       setPageLoading(false);
     }

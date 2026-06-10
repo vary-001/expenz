@@ -27,8 +27,10 @@ const Budget = () => {
         request('get', '/budgets'),
         request('get', '/income'),
       ]);
-      setBudgets(budgetRes.budgets || budgetRes || []);
-      const sources = [...new Set((incomeRes.incomes || incomeRes || []).map((i) => i.source).filter(Boolean))];
+      const budgetPayload = budgetRes?.data || budgetRes || {};
+      setBudgets(budgetPayload.budgets || []);
+      const incomePayload = incomeRes?.data || incomeRes || {};
+      const sources = [...new Set((incomePayload.incomes || []).map((i) => i.source).filter(Boolean))];
       setIncomeSources(sources);
     } catch {} finally {
       setPageLoading(false);
