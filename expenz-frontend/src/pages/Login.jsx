@@ -1,0 +1,142 @@
+// src/pages/Login.jsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
+import Input from '../components/common/Input';
+import Button from '../components/common/Button';
+import Logo from '../assets/svgs/Logo';
+import WaveBackground from '../assets/svgs/WaveBackground';
+import LoginIllustration from '../assets/svgs/LoginIllustration';
+import UserIcon from '../assets/svgs/UserIcon';
+
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const { addToast } = useToast();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !password) {
+      addToast('Please fill in all fields', 'error');
+      return;
+    }
+    setLoading(true);
+    try {
+      await login(email, password);
+      addToast('Welcome back!', 'success');
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Login failed', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden flex min-h-[600px] relative"
+      >
+        {/* Left side - Form */}
+        <div className="w-full lg:w-1/2 p-8 sm:p-12 flex flex-col justify-center relative z-10">
+          {/* Logo */}
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-3 mb-10"
+          >
+            <Logo size={40} />
+            <div>
+              <h1 className="text-2xl font-roboto font-bold text-gradient-forest">Expenz</h1>
+              <p className="text-[10px] font-roboto text-sage-400 -mt-0.5">Smart Finance Manager</p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 className="text-3xl font-roboto font-bold text-forest-900 mb-2">Log in</h2>
+            <p className="text-sm font-roboto text-sage-400 mb-8">Welcome back! Manage your finances smartly.</p>
+          </motion.div>
+
+          <motion.form
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+            <Input
+              label="Login, email or phone number"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              icon={UserIcon}
+            />
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+            />
+            <Button type="submit" loading={loading} fullWidth className="!rounded-full !py-3.5">
+              Log in
+            </Button>
+          </motion.form>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="mt-6 text-center"
+          >
+            <p className="text-sm font-roboto text-sage-400">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-forest-600 font-medium hover:text-forest-700 transition-colors">
+                Sign up
+              </Link>
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Right side - Illustration with wave background */}
+        <div className="hidden lg:block w-1/2 relative overflow-hidden">
+          {/* Wave background */}
+          <WaveBackground className="absolute inset-0 w-full h-full" />
+
+          {/* Illustration overlay */}
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5, duration: 0.7 }}
+            >
+              <LoginIllustration className="w-80 h-80 drop-shadow-lg" />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Mobile wave decoration */}
+        <div className="lg:hidden absolute bottom-0 right-0 w-full h-32 pointer-events-none opacity-30">
+          <svg viewBox="0 0 400 120" fill="none" className="w-full h-full" preserveAspectRatio="none">
+            <path d="M0,120 C100,80 200,100 400,40 L400,120 Z" fill="#d9ece2" />
+            <path d="M0,120 C150,90 250,110 400,60 L400,120 Z" fill="#b5d9c6" opacity="0.5" />
+          </svg>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Login;
