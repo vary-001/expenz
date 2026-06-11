@@ -8,7 +8,7 @@ const env = require('./config/env');
 
 // Import all routes
 const authRoutes = require('./routes/authRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 const archiveRoutes = require('./routes/archiveRoutes');
@@ -57,7 +57,8 @@ app.get('/api/health', (req, res) => {
 
 // ─── API ROUTES ───
 app.use('/api/auth', authRoutes);
-app.use('/api/transactions', transactionRoutes);
+
+app.use('/api/expenses', expenseRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/archives', archiveRoutes);

@@ -1,65 +1,72 @@
 // src/controllers/dashboardController.js
-const Transaction = require('../models/Transaction');
+const Expense = require('../models/Expense');
 const Income = require('../models/Income');
 const Budget = require('../models/Budget');
-const { success, error } = require('../utils/apiResponse');
+const { success } = require('../utils/apiResponse');
 
 const getDashboard = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const incomeAgg = await Income.aggregate([
-      { $match: { user: userId } },
-      { $group: { _id: null, total: { $sum: '$amount' } } },
+    // Totals
+    const [incomeAgg, expenseAgg] = await Promise.all([
+      Income.aggregate([
+        { $match: { user: userId } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      Expense.aggregate([
+        { $match: { user: userId } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
     ]);
+
     const totalIncome = incomeAgg[0]?.total || 0;
-
-    const expenseAgg = await Transaction.aggregate([
-      { $match: { user: userId } },
-      { $group: { _id: null, total: { $sum: '$amount' } } },
-    ]);
     const totalExpense = expenseAgg[0]?.total || 0;
+    const balance = totalIncome - totalExpense;
 
-    const expenseByCategory = await Transaction.aggregate([
+    // Budget remaining
+    const budgets = await Budget.find({ user: userId });
+    const totalBudgeted = budgets.reduce((sum, b) => sum + b.amount, 0);
+    const budgetRemaining = Math.max(totalBudgeted - totalExpense, 0);
+
+    // Expense breakdown by category (for pie chart)
+    const expenseByCategory = await Expense.aggregate([
       { $match: { user: userId } },
-      { $group: { _id: '$category', total: { $sum: '$amount' } } },
-      { $project: { category: '$_id', amount: '$total', _id: 0 } },
+      { $group: { _id: '$category', amount: { $sum: '$amount' } } },
+      { $project: { category: '$_id', amount: 1, _id: 0 } },
       { $sort: { amount: -1 } },
     ]);
 
+    // Income by source (for bar chart)
     const incomeBySource = await Income.aggregate([
       { $match: { user: userId } },
       { $group: { _id: '$source', amount: { $sum: '$amount' } } },
       { $project: { source: '$_id', amount: 1, _id: 0 } },
       { $sort: { amount: -1 } },
+      { $limit: 8 },
     ]);
 
-    const recentTransactions = await Transaction.find({ user: userId })
-      .sort({ date: -1 })
-      .limit(10)
-      .select('description amount category date type');
+    // Recent activity (last 10 mixed)
+    const [recentExpenses, recentIncomes] = await Promise.all([
+      Expense.find({ user: userId }).sort({ date: -1 }).limit(5).lean(),
+      Income.find({ user: userId }).sort({ date: -1 }).limit(5).lean(),
+    ]);
 
-    // Calculate total budget remaining
-    const budgets = await Budget.find({ user: userId });
-    const budgetsWithRemaining = await Promise.all(
-      budgets.map(async (b) => {
-        const resAgg = await Transaction.aggregate([
-          { $match: { user: userId, category: b.category } },
-          { $group: { _id: null, total: { $sum: '$amount' } } },
-        ]);
-        const spent = resAgg[0]?.total || 0;
-        return Math.max(b.amount - spent, 0);
-      })
-    );
-    const budgetRemaining = budgetsWithRemaining.reduce((s, n) => s + n, 0);
+    const recentTransactions = [
+      ...recentExpenses.map((e) => ({ ...e, type: 'expense' })),
+      ...recentIncomes.map((i) => ({ ...i, type: 'income' })),
+    ]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 10);
 
-    return success(res, 200, 'Dashboard fetched', {
+    return success(res, 200, 'Dashboard data fetched', {
       totalIncome,
       totalExpense,
+      balance,
+      budgetRemaining,
       expenseByCategory,
       incomeBySource,
       recentTransactions,
-      budgetRemaining,
     });
   } catch (err) {
     next(err);

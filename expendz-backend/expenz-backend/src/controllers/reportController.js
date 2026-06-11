@@ -1,5 +1,5 @@
 // src/controllers/reportController.js
-const Transaction = require('../models/Transaction');
+const Expense = require('../models/Expense');
 const Income = require('../models/Income');
 const Budget = require('../models/Budget');
 const { success, error } = require('../utils/apiResponse');

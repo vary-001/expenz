@@ -14,9 +14,10 @@ import LogoutIcon from '../../assets/svgs/LogoutIcon';
 import CloseIcon from '../../assets/svgs/CloseIcon';
 import { useAuth } from '../../hooks/useAuth';
 
+// src/components/layout/MobileNav.jsx (UPDATE navItems)
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', Icon: DashboardIcon },
-  { path: '/transactions', label: 'Transactions', Icon: ExpenseIcon },
+  { path: '/expenses', label: 'Expenses', Icon: ExpenseIcon },  // ← renamed
   { path: '/income', label: 'Income', Icon: IncomeIcon },
   { path: '/budget', label: 'Budget', Icon: BudgetIcon },
   { path: '/reports', label: 'Reports', Icon: ReportIcon },

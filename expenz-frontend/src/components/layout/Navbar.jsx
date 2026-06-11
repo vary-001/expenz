@@ -8,9 +8,10 @@ import MenuIcon from '../../assets/svgs/MenuIcon';
 import { useAuth } from '../../hooks/useAuth';
 import { getGreeting } from '../../utils/formatters';
 
+// src/components/layout/Navbar.jsx (UPDATE pageTitles)
 const pageTitles = {
   '/dashboard': 'Dashboard',
-  '/transactions': 'Transactions',
+  '/expenses': 'Expenses',  // ← renamed
   '/income': 'Income Sources',
   '/budget': 'Budget Planner',
   '/reports': 'Reports',
