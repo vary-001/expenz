@@ -2,16 +2,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import ThemeToggle from '../components/common/ThemeToggle';
+import LanguageToggle from '../components/common/LanguageToggle';
 import Logo from '../assets/svgs/Logo';
 import WaveBackground from '../assets/svgs/WaveBackground';
 import LoginIllustration from '../assets/svgs/LoginIllustration';
 import UserIcon from '../assets/svgs/UserIcon';
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,16 +40,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white dark:bg-surface-dark flex items-center justify-center p-4 theme-transition">
+      {/* Top-right controls */}
+      <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden flex min-h-[600px] relative"
+        className="w-full max-w-5xl bg-white dark:bg-surface-card-dark rounded-3xl shadow-xl overflow-hidden flex min-h-[600px] relative border border-sage-100 dark:border-surface-border-dark"
       >
-        {/* Left side - Form */}
+        {/* Form side */}
         <div className="w-full lg:w-1/2 p-8 sm:p-12 flex flex-col justify-center relative z-10">
-          {/* Logo */}
           <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -54,8 +63,10 @@ const Login = () => {
           >
             <Logo size={40} />
             <div>
-              <h1 className="text-2xl font-roboto font-bold text-gradient-forest">Expenz</h1>
-              <p className="text-[10px] font-roboto text-sage-400 -mt-0.5">Smart Finance Manager</p>
+              <h1 className="font-poppins font-bold text-2xl text-gradient-forest">Expenz</h1>
+              <p className="text-[10px] font-inter text-sage-400 dark:text-sage-500 -mt-0.5 tracking-wide uppercase">
+                Smart Finance
+              </p>
             </div>
           </motion.div>
 
@@ -64,8 +75,10 @@ const Login = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <h2 className="text-3xl font-roboto font-bold text-forest-900 mb-2">Log in</h2>
-            <p className="text-sm font-roboto text-sage-400 mb-8">Welcome back! Manage your finances smartly.</p>
+            <h2 className="font-poppins font-bold text-3xl text-forest-900 dark:text-forest-50 mb-2">
+              {t('auth.login')}
+            </h2>
+            <p className="body-text mb-8">{t('auth.welcomeBack')}</p>
           </motion.div>
 
           <motion.form
@@ -76,7 +89,7 @@ const Login = () => {
             className="space-y-5"
           >
             <Input
-              label="Login, email or phone number"
+              label={t('auth.email')}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -84,14 +97,14 @@ const Login = () => {
               icon={UserIcon}
             />
             <Input
-              label="Password"
+              label={t('auth.password')}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="••••••••"
             />
             <Button type="submit" loading={loading} fullWidth className="!rounded-full !py-3.5">
-              Log in
+              {t('auth.login')}
             </Button>
           </motion.form>
 
@@ -101,21 +114,21 @@ const Login = () => {
             transition={{ delay: 0.6 }}
             className="mt-6 text-center"
           >
-            <p className="text-sm font-roboto text-sage-400">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-forest-600 font-medium hover:text-forest-700 transition-colors">
-                Sign up
+            <p className="body-text">
+              {t('auth.noAccount')}{' '}
+              <Link
+                to="/register"
+                className="text-forest-600 dark:text-forest-300 font-poppins font-semibold hover:text-forest-700 dark:hover:text-forest-200 transition-colors"
+              >
+                {t('auth.signUp')}
               </Link>
             </p>
           </motion.div>
         </div>
 
-        {/* Right side - Illustration with wave background */}
+        {/* Illustration side */}
         <div className="hidden lg:block w-1/2 relative overflow-hidden">
-          {/* Wave background */}
           <WaveBackground className="absolute inset-0 w-full h-full" />
-
-          {/* Illustration overlay */}
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <motion.div
               initial={{ opacity: 0, x: 30 }}
@@ -125,14 +138,6 @@ const Login = () => {
               <LoginIllustration className="w-80 h-80 drop-shadow-lg" />
             </motion.div>
           </div>
-        </div>
-
-        {/* Mobile wave decoration */}
-        <div className="lg:hidden absolute bottom-0 right-0 w-full h-32 pointer-events-none opacity-30">
-          <svg viewBox="0 0 400 120" fill="none" className="w-full h-full" preserveAspectRatio="none">
-            <path d="M0,120 C100,80 200,100 400,40 L400,120 Z" fill="#d9ece2" />
-            <path d="M0,120 C150,90 250,110 400,60 L400,120 Z" fill="#b5d9c6" opacity="0.5" />
-          </svg>
         </div>
       </motion.div>
     </div>

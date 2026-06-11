@@ -1,0 +1,205 @@
+
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "search": "Search...",
+    "all": "All",
+    "filter": "Filter",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "expenses": "Expenses",
+    "income": "Income",
+    "budget": "Budget",
+    "reports": "Reports",
+    "settings": "Settings",
+    "logout": "Sign Out"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "welcomeBack": "Welcome back! Manage your finances smartly.",
+    "createAccount": "Start your smart financial journey today.",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signUp": "Sign up",
+    "forgotPassword": "Forgot password?"
+  },
+  "onboarding": {
+    "welcome": "Welcome to Expenz",
+    "letsSetup": "Let's personalize your experience",
+    "currency": "Choose your currency",
+    "currencyDesc": "Select the currency you use daily. You can change this later in settings.",
+    "language": "Choose your language",
+    "languageDesc": "Select your preferred language for the app interface.",
+    "theme": "Choose your theme",
+    "themeDesc": "Pick a theme that's easy on your eyes.",
+    "ready": "You're all set!",
+    "readyDesc": "Start tracking your finances and take control of your money.",
+    "getStarted": "Get Started"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Good Morning",
+    "greetingAfternoon": "Good Afternoon",
+    "greetingEvening": "Good Evening",
+    "balance": "Total Balance",
+    "income": "Total Income",
+    "expenses": "Total Expenses",
+    "budgetLeft": "Budget Left",
+    "expenseBreakdown": "Expense Breakdown",
+    "incomeBySource": "Income by Source",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "noData": "No data yet",
+    "refresh": "Refresh"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "addExpense": "Add Expense",
+    "newExpense": "New Expense",
+    "editExpense": "Edit Expense",
+    "totalSpent": "Total Spent",
+    "thisMonth": "This Month",
+    "today": "Today",
+    "description": "Description",
+    "amount": "Amount",
+    "category": "Category",
+    "date": "Date",
+    "notes": "Notes (optional)",
+    "noExpenses": "No expenses yet",
+    "addFirstExpense": "Add Your First Expense"
+  },
+  "income": {
+    "title": "Income",
+    "addIncome": "Add Income",
+    "newIncome": "New Income",
+    "totalIncome": "Total Income",
+    "sources": "Income Sources",
+    "source": "Source Name",
+    "topSource": "Top Source"
+  },
+  "budget": {
+    "title": "Budget Planner",
+    "createBudget": "Create Budget",
+    "monthlyBudget": "Monthly Budget",
+    "budgeted": "Budgeted",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "overBudget": "Over Budget",
+    "withinBudget": "Within Budget"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile Information",
+    "preferences": "Preferences",
+    "appearance": "Appearance",
+    "language": "Language",
+    "currency": "Currency",
+    "theme": "Theme",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password"
+  },
+  "categories": {
+    "food": "Food & Dining",
+    "transport": "Transportation",
+    "utilities": "Utilities",
+    "entertainment": "Entertainment",
+    "health": "Health & Medical",
+    "education": "Education",
+    "shopping": "Shopping",
+    "rent": "Rent & Housing",
+    "salary": "Salary",
+    "freelance": "Freelance",
+    "investment": "Investment",
+    "business": "Business",
+    "other": "Other"
+  },
+  "reports": {
+    "title": "Financial Reports",
+    "subtitle": "Your Money Insights",
+    "analyzing": "Analyzing your finances...",
+    "refresh": "Refresh",
+    "download": "Download PDF",
+    "downloading": "Generating PDF...",
+    "downloaded": "Report downloaded successfully",
+    "downloadFailed": "Failed to download report",
+    "period": {
+      "title": "Time Period",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days",
+      "month": "This month",
+      "year": "This year",
+      "all": "All time",
+      "custom": "Custom range",
+      "from": "From",
+      "to": "To",
+      "days": "days"
+    },
+    "metrics": {
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netBalance": "Net Balance",
+      "savingsRate": "Savings Rate",
+      "avgDaily": "Avg {{amount}} per day",
+      "transactions": "Transactions"
+    },
+    "story": {
+      "title": "How Your Money Was Spent",
+      "subtitle": "An automated analysis of your financial activity"
+    },
+    "charts": {
+      "expenseBreakdown": "Expenses by Category",
+      "incomeBreakdown": "Income by Source",
+      "dailyTrend": "Daily Trend",
+      "trendSubtitle": "Income vs expenses over time",
+      "budgetAnalysis": "Budget vs Actual",
+      "noData": "No data available",
+      "total": "Total",
+      "income": "Income",
+      "expense": "Expense",
+      "spent": "spent",
+      "of": "of",
+      "left": "left",
+      "overBy": "Over by {{amount}}"
+    },
+    "suggestions": {
+      "title": "Smart Suggestions",
+      "subtitle": "Personalized insights based on your finances",
+      "tip": "Tip"
+    },
+    "topTransactions": {
+      "expenses": "Top 5 Expenses",
+      "incomes": "Top 5 Income Records"
+    },
+    "pdf": {
+      "title": "EXPENZ Financial Report",
+      "generatedOn": "Generated on",
+      "period": "Period",
+      "summary": "Financial Summary",
+      "moneyStory": "How Your Money Was Spent",
+      "categoryBreakdown": "Spending Breakdown",
+      "suggestions": "Smart Suggestions",
+      "footer": "Generated by Expenz - Smart Finance Manager"
+    }
+  }
+}

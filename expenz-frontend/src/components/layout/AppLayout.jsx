@@ -4,12 +4,13 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import MobileNav from './MobileNav';
+import OnboardingModal from '../onboarding/OnboardingModal';
 
 const AppLayout = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-surface-dark theme-transition">
       <Sidebar />
       <MobileNav isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
       <div className="lg:ml-64 min-h-screen flex flex-col">
@@ -18,6 +19,7 @@ const AppLayout = () => {
           <Outlet />
         </main>
       </div>
+      <OnboardingModal />
     </div>
   );
 };

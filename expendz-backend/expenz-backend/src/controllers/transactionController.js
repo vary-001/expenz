@@ -1,6 +1,5 @@
 // src/controllers/transactionController.js
 const Transaction = require('../models/Transaction');
-const Archive = require('../models/Archive');
 const { success, error } = require('../utils/apiResponse');
 
 /**
@@ -92,7 +91,7 @@ const updateTransaction = async (req, res, next) => {
 
 /**
  * DELETE /api/transactions/:id
- * Soft delete - moves to archive
+ * Hard delete (archive removed)
  */
 const deleteTransaction = async (req, res, next) => {
   try {
@@ -102,22 +101,8 @@ const deleteTransaction = async (req, res, next) => {
     });
 
     if (!transaction) return error(res, 404, 'Transaction not found');
-
-    // Move to archive
-    await Archive.create({
-      user: req.user._id,
-      originalModel: 'Transaction',
-      description: transaction.description,
-      amount: transaction.amount,
-      category: transaction.category,
-      type: transaction.type,
-      date: transaction.date,
-      notes: transaction.notes,
-    });
-
     await transaction.deleteOne();
-
-    return success(res, 200, 'Transaction moved to archive');
+    return success(res, 200, 'Transaction deleted successfully');
   } catch (err) {
     next(err);
   }

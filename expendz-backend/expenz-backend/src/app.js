@@ -11,7 +11,6 @@ const authRoutes = require('./routes/authRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
-const archiveRoutes = require('./routes/archiveRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
@@ -61,7 +60,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/budgets', budgetRoutes);
-app.use('/api/archives', archiveRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
@@ -76,7 +74,6 @@ app.get('/', (req, res) => {
       transactions: '/api/transactions',
       income: '/api/income',
       budgets: '/api/budgets',
-      archives: '/api/archives',
       reports: '/api/reports',
       dashboard: '/api/dashboard',
     },

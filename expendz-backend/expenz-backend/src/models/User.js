@@ -27,17 +27,34 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters'],
-      select: false, // Don't return password in queries by default
-    },
-    currency: {
-      type: String,
-      default: 'USD',
-      trim: true,
-      uppercase: true,
+      select: false,
     },
     avatar: {
       type: String,
       default: '',
+    },
+    // NEW: User preferences
+    preferences: {
+      currency: {
+        type: String,
+        enum: ['USD', 'RWF'],
+        default: 'USD',
+      },
+      language: {
+        type: String,
+        enum: ['en', 'kiny'],
+        default: 'en',
+      },
+      theme: {
+        type: String,
+        enum: ['light', 'dark'],
+        default: 'light',
+      },
+    },
+    // NEW: Track if user completed onboarding
+    onboarded: {
+      type: Boolean,
+      default: false,
     },
     lastLogin: {
       type: Date,
@@ -60,7 +77,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash password before save
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   try {
@@ -72,12 +88,10 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Get safe user object (no sensitive data)
 userSchema.methods.toSafeObject = function () {
   const obj = this.toObject();
   delete obj.password;
@@ -85,6 +99,4 @@ userSchema.methods.toSafeObject = function () {
   return obj;
 };
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

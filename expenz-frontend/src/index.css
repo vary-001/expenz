@@ -1,5 +1,6 @@
 /* src/index.css */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,33 +11,59 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Inter', sans-serif;
   background-color: #ffffff;
   color: #1c392d;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Custom scrollbar */
+body.dark {
+  background-color: #0f201a;
+  color: #f0f7f4;
+}
+
+/* Tabular numbers for currency */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Scrollbar - Light Mode */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: #f0f7f4;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #b5d9c6;
-  border-radius: 3px;
+  border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #5a9f7e;
 }
 
-/* Gradient text utility */
+/* Scrollbar - Dark Mode */
+.dark ::-webkit-scrollbar-track {
+  background: #1a2e25;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #2a4035;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3d8365;
+}
+
+/* Gradient text */
 .text-gradient-forest {
   background: linear-gradient(135deg, #2d6a50 0%, #1c392d 100%);
   -webkit-background-clip: text;
@@ -44,38 +71,110 @@ body {
   background-clip: text;
 }
 
-.text-gradient-sage {
-  background: linear-gradient(135deg, #5a9f7e 0%, #2d6a50 100%);
+.dark .text-gradient-forest {
+  background: linear-gradient(135deg, #85bfa3 0%, #5a9f7e 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glass effect */
-.glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-/* Smooth transitions */
-.transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Smooth theme transitions */
+.theme-transition,
+.theme-transition * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 @layer components {
-  .btn-forest {
-    @apply bg-gradient-forest text-white font-roboto font-medium px-6 py-3 rounded-full
-           hover:shadow-forest transition-all duration-300 active:scale-95;
+  /* Buttons */
+  .btn-primary {
+    @apply bg-gradient-forest text-white font-poppins font-semibold px-6 py-3 rounded-xl
+           hover:shadow-forest transition-all duration-300 active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  .input-forest {
-    @apply w-full px-4 py-3 rounded-xl border border-sage-200 bg-white font-roboto
-           focus:outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-100
-           transition-all duration-300 text-forest-900 placeholder:text-sage-400;
+  /* Inputs - works in both themes */
+  .input-base {
+    @apply w-full px-4 py-3 rounded-xl font-inter text-sm
+           bg-white dark:bg-surface-card-dark
+           border border-sage-200 dark:border-surface-border-dark
+           text-forest-900 dark:text-forest-50
+           placeholder:text-sage-400 dark:placeholder:text-sage-500
+           focus:outline-none focus:border-forest-400 dark:focus:border-forest-300
+           focus:ring-2 focus:ring-forest-100 dark:focus:ring-forest-900/40
+           transition-all duration-300;
   }
 
-  .card-forest {
-    @apply bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 p-6;
+  /* Cards - dark mode aware */
+  .card-base {
+    @apply bg-white dark:bg-surface-card-dark
+           rounded-2xl shadow-card dark:shadow-card-dark
+           border border-sage-100/40 dark:border-surface-border-dark
+           transition-all duration-300;
   }
+
+  /* Typography */
+  .heading-1 {
+    @apply font-poppins font-bold text-2xl text-forest-900 dark:text-forest-50;
+  }
+  .heading-2 {
+    @apply font-poppins font-semibold text-xl text-forest-900 dark:text-forest-50;
+  }
+  .heading-3 {
+    @apply font-poppins font-semibold text-base text-forest-800 dark:text-forest-100;
+  }
+  .body-text {
+    @apply font-inter text-sm text-sage-600 dark:text-sage-300;
+  }
+  .label-text {
+    @apply font-inter font-medium text-sm text-forest-800 dark:text-forest-100;
+  }
+  .money {
+    @apply font-inter font-semibold tabular-nums;
+  }
+}
+
+/* Hide scrollbar but allow scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ═══════════════════════════════════════════════════
+   MODAL SCROLLBAR
+   ═══════════════════════════════════════════════════ */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d2d6c7;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #b4bba3;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2a4035;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3d8365;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

@@ -68,7 +68,7 @@ const Transactions = () => {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await request('delete', `/transactions/${deleteTarget._id}`, null, 'Moved to archive');
+      await request('delete', `/transactions/${deleteTarget._id}`, null, 'Transaction deleted');
       setDeleteTarget(null);
       fetchTransactions();
     } catch {}
@@ -152,8 +152,8 @@ const Transactions = () => {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Archive Transaction"
-        message="This will move the transaction to your archive. You can restore it later."
+        title="Delete Transaction"
+        message="This will permanently delete the transaction. This action cannot be undone."
         loading={loading}
       />
     </div>

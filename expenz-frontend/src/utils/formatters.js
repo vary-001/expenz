@@ -1,10 +1,27 @@
 // src/utils/formatters.js
 import { format, parseISO, isValid } from 'date-fns';
 
-export const formatCurrency = (amount, currency = 'USD') => {
+// Get user's currency from localStorage
+const getUserCurrency = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('expenz_user') || '{}');
+    return user?.preferences?.currency || 'USD';
+  } catch {
+    return 'USD';
+  }
+};
+
+export const formatCurrency = (amount, currency = null) => {
+  const curr = currency || getUserCurrency();
+  if (curr === 'RWF') {
+    return `FRw ${new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount || 0)}`;
+  }
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency,
+    currency: 'USD',
     minimumFractionDigits: 2,
   }).format(amount || 0);
 };
@@ -21,15 +38,18 @@ export const formatDateShort = (date) => {
   return isValid(parsed) ? format(parsed, 'MM/dd/yy') : '';
 };
 
-export const formatPercentage = (value) => {
-  return `${(value || 0).toFixed(1)}%`;
-};
+export const formatPercentage = (value) => `${(value || 0).toFixed(1)}%`;
 
-export const getGreeting = () => {
+export const getGreeting = (t) => {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Good Morning';
-  if (hour < 17) return 'Good Afternoon';
-  return 'Good Evening';
+  if (!t) {
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
+  if (hour < 12) return t('dashboard.greeting');
+  if (hour < 17) return t('dashboard.greetingAfternoon');
+  return t('dashboard.greetingEvening');
 };
 
 export const getCategoryColor = (category) => {

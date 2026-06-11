@@ -1,0 +1,205 @@
+
+{
+  "common": {
+    "save": "Bika",
+    "cancel": "Hagarika",
+    "delete": "Siba",
+    "edit": "Hindura",
+    "loading": "Birashakishwa...",
+    "search": "Shakisha...",
+    "all": "Byose",
+    "filter": "Shungura",
+    "confirm": "Emeza",
+    "back": "Subira",
+    "next": "Komeza",
+    "finish": "Soza",
+    "yes": "Yego",
+    "no": "Oya",
+    "close": "Funga"
+  },
+  "nav": {
+    "dashboard": "Ikibaho",
+    "expenses": "Ayakoreshejwe",
+    "income": "Ayinjiye",
+    "budget": "Ingengo y'Imari",
+    "reports": "Raporo",
+    "settings": "Igenamiterere",
+    "logout": "Sohoka"
+  },
+  "auth": {
+    "login": "Injira",
+    "register": "Iyandikishe",
+    "email": "Imeyili",
+    "password": "Ijambobanga",
+    "confirmPassword": "Emeza Ijambobanga",
+    "name": "Amazina yose",
+    "welcomeBack": "Murakaza neza! Genzura amafaranga yawe neza.",
+    "createAccount": "Tangira urugendo rwo gucunga amafaranga uyu munsi.",
+    "noAccount": "Nta konti ufite?",
+    "haveAccount": "Usanzwe ufite konti?",
+    "signUp": "Iyandikishe",
+    "forgotPassword": "Wibagiwe ijambobanga?"
+  },
+  "onboarding": {
+    "welcome": "Murakaza neza kuri Expenz",
+    "letsSetup": "Reka tubigereho nawe",
+    "currency": "Hitamo ifaranga",
+    "currencyDesc": "Hitamo ifaranga ukoresha buri munsi. Ushobora kuribihindura mu igenamiterere.",
+    "language": "Hitamo ururimi",
+    "languageDesc": "Hitamo ururimi ukunda gukoresha.",
+    "theme": "Hitamo isura",
+    "themeDesc": "Hitamo isura yoroheye amaso yawe.",
+    "ready": "Witeguye!",
+    "readyDesc": "Tangira gukurikirana amafaranga yawe.",
+    "getStarted": "Tangira"
+  },
+  "dashboard": {
+    "title": "IKAZE",
+    "greeting": "Mwaramutse",
+    "greetingAfternoon": "Mwiriwe",
+    "greetingEvening": "Muraho",
+    "balance": "Amafaranga Yose",
+    "income": "Amafaranga Yinjiye",
+    "expenses": "Amafaranga Yakoreshejwe",
+    "budgetLeft": "Ingengo Isigaye",
+    "expenseBreakdown": "Imisaruro y'Amafaranga",
+    "incomeBySource": "Inkomoko z'Amafaranga",
+    "quickActions": "Ibikorwa Byihuse",
+    "recentActivity": "Ibikorwa Bishya",
+    "noData": "Nta makuru",
+    "refresh": "Vugurura"
+  },
+  "expenses": {
+    "title": "Amafaranga Yakoreshejwe",
+    "addExpense": "Ongeraho",
+    "newExpense": "Ikoreshwa Rishya",
+    "editExpense": "Hindura",
+    "totalSpent": "Yose Yakoreshejwe",
+    "thisMonth": "Uku Kwezi",
+    "today": "Uyu Munsi",
+    "description": "Ibisobanuro",
+    "amount": "Umubare",
+    "category": "Icyiciro",
+    "date": "Itariki",
+    "notes": "Inyandiko (siko ngombwa)",
+    "noExpenses": "Nta mafaranga yakoreshejwe",
+    "addFirstExpense": "Ongeraho icya mbere"
+  },
+  "income": {
+    "title": "Amafaranga Yinjiye",
+    "addIncome": "Ongeraho",
+    "newIncome": "Amafaranga Mashya",
+    "totalIncome": "Yose Yinjiye",
+    "sources": "Inkomoko",
+    "source": "Izina ry'Inkomoko",
+    "topSource": "Inkomoko Nyamukuru"
+  },
+  "budget": {
+    "title": "Ingengo y'Imari",
+    "createBudget": "Kora Ingengo",
+    "monthlyBudget": "Ingengo y'Ukwezi",
+    "budgeted": "Iteguwe",
+    "spent": "Yakoreshejwe",
+    "remaining": "Isigaye",
+    "overBudget": "Yarenze Ingengo",
+    "withinBudget": "Iri muri Ingengo"
+  },
+  "settings": {
+    "title": "Igenamiterere",
+    "profile": "Amakuru y'Umwirondoro",
+    "preferences": "Amahitamo",
+    "appearance": "Isura",
+    "language": "Ururimi",
+    "currency": "Ifaranga",
+    "theme": "Isura",
+    "lightMode": "Isura Yororoshye",
+    "darkMode": "Isura Ijimye",
+    "changePassword": "Hindura Ijambobanga",
+    "currentPassword": "Ijambobanga Ririho",
+    "newPassword": "Ijambobanga Rishya"
+  },
+  "categories": {
+    "food": "Ibiribwa",
+    "transport": "Ingendo",
+    "utilities": "Serivisi",
+    "entertainment": "Imyidagaduro",
+    "health": "Ubuzima",
+    "education": "Uburezi",
+    "shopping": "Kugura",
+    "rent": "Ubukode",
+    "salary": "Umushahara",
+    "freelance": "Ibikorwa byigenga",
+    "investment": "Ishoramari",
+    "business": "Ubucuruzi",
+    "other": "Ibindi"
+  },
+  "reports": {
+    "title": "Raporo z'Imari",
+    "subtitle": "Isesengura ry'Amafaranga Yawe",
+    "analyzing": "Turi gusesengura amafaranga yawe...",
+    "refresh": "Vugurura",
+    "download": "Manura PDF",
+    "downloading": "Turi gukora PDF...",
+    "downloaded": "Raporo yamanuwe neza",
+    "downloadFailed": "Ntibyakunze gumanura raporo",
+    "period": {
+      "title": "Igihe",
+      "7d": "Iminsi 7 ishize",
+      "30d": "Iminsi 30 ishize",
+      "90d": "Iminsi 90 ishize",
+      "month": "Uku kwezi",
+      "year": "Uyu mwaka",
+      "all": "Igihe cyose",
+      "custom": "Hitamo igihe",
+      "from": "Kuva",
+      "to": "Kugeza",
+      "days": "iminsi"
+    },
+    "metrics": {
+      "totalIncome": "Amafaranga Yose Yinjiye",
+      "totalExpenses": "Amafaranga Yose Yakoreshejwe",
+      "netBalance": "Amafaranga Asigaye",
+      "savingsRate": "Igipimo cyo Kuzigama",
+      "avgDaily": "Impuzandengo {{amount}} ku munsi",
+      "transactions": "Ibikorwa"
+    },
+    "story": {
+      "title": "Uko Amafaranga Yawe Yakoreshejwe",
+      "subtitle": "Isesengura ryikora ku bikorwa byawe by'amafaranga"
+    },
+    "charts": {
+      "expenseBreakdown": "Amafaranga Yakoreshejwe ku Byiciro",
+      "incomeBreakdown": "Amafaranga Yinjiye ku Nkomoko",
+      "dailyTrend": "Iterambere rya Buri Munsi",
+      "trendSubtitle": "Yinjiye vs Yakoreshejwe mu gihe",
+      "budgetAnalysis": "Ingengo vs Byakozwe",
+      "noData": "Nta makuru",
+      "total": "Yose",
+      "income": "Yinjiye",
+      "expense": "Yakoreshejwe",
+      "spent": "yakoreshejwe",
+      "of": "kuri",
+      "left": "asigaye",
+      "overBy": "Yarengeje {{amount}}"
+    },
+    "suggestions": {
+      "title": "Inama Zihariye",
+      "subtitle": "Inama zigufitiye akamaro ku mafaranga yawe",
+      "tip": "Inama"
+    },
+    "topTransactions": {
+      "expenses": "Amafaranga 5 ya Mbere Yakoreshejwe",
+      "incomes": "Inkomoko 5 za Mbere z'Amafaranga"
+    },
+    "pdf": {
+      "title": "Raporo y'Imari ya EXPENZ",
+      "generatedOn": "Yakozwe ku",
+      "period": "Igihe",
+      "summary": "Incamake y'Imari",
+      "moneyStory": "Uko Amafaranga Yakoreshejwe",
+      "categoryBreakdown": "Amafaranga ku Byiciro",
+      "suggestions": "Inama Zihariye",
+      "footer": "Yakozwe na Expenz - Smart Finance Manager"
+    }
+  }
+}

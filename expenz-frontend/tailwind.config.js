@@ -2,10 +2,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,jsx}"],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       fontFamily: {
-        roboto: ['Roboto', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+      },
+      fontFeatureSettings: {
+        tabular: '"tnum"',
       },
       colors: {
         forest: {
@@ -33,6 +38,15 @@ module.exports = {
           800: '#3f4536',
           900: '#363b2f',
         },
+        // Dark mode surface colors
+        surface: {
+          DEFAULT: '#ffffff',
+          dark: '#0f201a',
+          card: '#ffffff',
+          'card-dark': '#1a2e25',
+          border: '#e8eae2',
+          'border-dark': '#2a4035',
+        },
       },
       backgroundImage: {
         'gradient-forest': 'linear-gradient(135deg, #2d6a50 0%, #1c392d 100%)',
@@ -43,6 +57,7 @@ module.exports = {
         'forest': '0 4px 20px rgba(45, 106, 80, 0.15)',
         'card': '0 2px 16px rgba(0, 0, 0, 0.06)',
         'card-hover': '0 8px 30px rgba(0, 0, 0, 0.1)',
+        'card-dark': '0 2px 16px rgba(0, 0, 0, 0.3)',
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
@@ -51,7 +66,6 @@ module.exports = {
         'slide-down': 'slideDown 0.3s ease-out',
         'fade-in': 'fadeIn 0.4s ease-out',
         'spin-slow': 'spin 2s linear infinite',
-        'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -69,10 +83,6 @@ module.exports = {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
-        },
-        bounceGentle: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-5px)' },
         },
       },
     },

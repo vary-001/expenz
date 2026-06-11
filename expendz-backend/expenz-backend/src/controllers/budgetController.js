@@ -3,122 +3,95 @@ const Budget = require('../models/Budget');
 const Expense = require('../models/Expense');
 const { success, error } = require('../utils/apiResponse');
 
-/**
- * Helper: Calculate how much was spent in a category within budget period
- */
-const calculateSpent = async (userId, category, period) => {
+const getCurrentMonth = () => {
   const now = new Date();
-  let startDate;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+};
 
-  if (period === 'weekly') {
-    startDate = new Date(now);
-    startDate.setDate(now.getDate() - 7);
-  } else if (period === 'monthly') {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  } else if (period === 'yearly') {
-    startDate = new Date(now.getFullYear(), 0, 1);
-  } else {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  }
+const getMonthRange = (monthStr) => {
+  const [year, month] = monthStr.split('-').map(Number);
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0, 23, 59, 59);
+  return { start, end };
+};
 
-  const result = await Transaction.aggregate([
+const calculateSpent = async (userId, category, month) => {
+  const { start, end } = getMonthRange(month);
+  const result = await Expense.aggregate([
     {
       $match: {
         user: userId,
         category: category.toLowerCase(),
-        date: { $gte: startDate, $lte: now },
+        date: { $gte: start, $lte: end },
       },
     },
-    {
-      $group: { _id: null, total: { $sum: '$amount' } },
-    },
+    { $group: { _id: null, total: { $sum: '$amount' } } },
   ]);
-
   return result[0]?.total || 0;
 };
 
 /**
  * GET /api/budgets
- * Get all budgets with spent amount calculated
+ * Get all budgets for current month (or specified month via ?month=YYYY-MM)
  */
 const getAllBudgets = async (req, res, next) => {
   try {
-    const budgets = await Budget.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const month = req.query.month || getCurrentMonth();
 
-    // Add spent amount to each budget
+    const budgets = await Budget.find({ user: req.user._id, month }).sort({ createdAt: -1 });
+
     const budgetsWithSpent = await Promise.all(
       budgets.map(async (budget) => {
-        const spent = await calculateSpent(req.user._id, budget.category, budget.period);
+        const spent = await calculateSpent(req.user._id, budget.category, budget.month);
         return {
           ...budget.toObject(),
           spent,
           remaining: Math.max(budget.amount - spent, 0),
           percentageUsed: budget.amount > 0 ? Math.min((spent / budget.amount) * 100, 100) : 0,
+          isOverBudget: spent > budget.amount,
         };
       })
     );
 
-    return success(res, 200, 'Budgets fetched', { budgets: budgetsWithSpent });
+    return success(res, 200, 'Budgets fetched', { budgets: budgetsWithSpent, month });
   } catch (err) {
     next(err);
   }
 };
 
-/**
- * GET /api/budgets/:id
- */
 const getBudget = async (req, res, next) => {
   try {
-    const budget = await Budget.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
+    const budget = await Budget.findOne({ _id: req.params.id, user: req.user._id });
     if (!budget) return error(res, 404, 'Budget not found');
-
-    const spent = await calculateSpent(req.user._id, budget.category, budget.period);
-
-    return success(res, 200, 'Budget fetched', {
-      budget: {
-        ...budget.toObject(),
-        spent,
-        remaining: Math.max(budget.amount - spent, 0),
-      },
-    });
+    return success(res, 200, 'Budget fetched', { budget });
   } catch (err) {
     next(err);
   }
 };
 
-/**
- * POST /api/budgets
- * Create a new budget
- */
 const createBudget = async (req, res, next) => {
   try {
-    const { category, amount, period, incomeSource } = req.body;
+    const { category, amount, incomeSource } = req.body;
+    const month = req.body.month || getCurrentMonth();
 
-    if (!category || !amount || !period) {
-      return error(res, 400, 'Category, amount, and period are required');
-    }
-
+    if (!category || !amount) return error(res, 400, 'Category and amount are required');
     if (amount <= 0) return error(res, 400, 'Amount must be greater than 0');
 
-    // Check if budget already exists for this category
     const existing = await Budget.findOne({
       user: req.user._id,
       category: category.toLowerCase(),
+      month,
     });
 
     if (existing) {
-      return error(res, 409, `Budget for "${category}" already exists. Edit it instead.`);
+      return error(res, 409, `Budget for "${category}" already exists this month`);
     }
 
     const budget = await Budget.create({
       user: req.user._id,
-      category,
-      amount,
-      period,
+      category: category.toLowerCase().trim(),
+      amount: parseFloat(amount),
+      month,
       incomeSource: incomeSource || '',
     });
 
@@ -128,41 +101,28 @@ const createBudget = async (req, res, next) => {
   }
 };
 
-/**
- * PUT /api/budgets/:id
- */
 const updateBudget = async (req, res, next) => {
   try {
-    const budget = await Budget.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
+    const budget = await Budget.findOne({ _id: req.params.id, user: req.user._id });
     if (!budget) return error(res, 404, 'Budget not found');
 
-    const fields = ['category', 'amount', 'period', 'incomeSource'];
-    fields.forEach((field) => {
-      if (req.body[field] !== undefined) budget[field] = req.body[field];
-    });
+    const { amount, incomeSource } = req.body;
+    if (amount !== undefined) {
+      if (amount <= 0) return error(res, 400, 'Amount must be greater than 0');
+      budget.amount = parseFloat(amount);
+    }
+    if (incomeSource !== undefined) budget.incomeSource = incomeSource;
 
     await budget.save();
-    return success(res, 200, 'Budget updated successfully', { budget });
+    return success(res, 200, 'Budget updated', { budget });
   } catch (err) {
     next(err);
   }
 };
 
-/**
- * DELETE /api/budgets/:id
- * Hard delete (budgets aren't archived)
- */
 const deleteBudget = async (req, res, next) => {
   try {
-    const budget = await Budget.findOneAndDelete({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
+    const budget = await Budget.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!budget) return error(res, 404, 'Budget not found');
     return success(res, 200, 'Budget deleted successfully');
   } catch (err) {
@@ -170,10 +130,4 @@ const deleteBudget = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  getAllBudgets,
-  getBudget,
-  createBudget,
-  updateBudget,
-  deleteBudget,
-};
+module.exports = { getAllBudgets, getBudget, createBudget, updateBudget, deleteBudget };

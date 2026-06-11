@@ -2,32 +2,31 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Logo from '../../assets/svgs/Logo';
 import DashboardIcon from '../../assets/svgs/DashboardIcon';
 import ExpenseIcon from '../../assets/svgs/ExpenseIcon';
 import BudgetIcon from '../../assets/svgs/BudgetIcon';
 import IncomeIcon from '../../assets/svgs/IncomeIcon';
 import ReportIcon from '../../assets/svgs/ReportIcon';
-import ArchiveIcon from '../../assets/svgs/ArchiveIcon';
 import SettingsIcon from '../../assets/svgs/SettingsIcon';
 import LogoutIcon from '../../assets/svgs/LogoutIcon';
 import CloseIcon from '../../assets/svgs/CloseIcon';
 import { useAuth } from '../../hooks/useAuth';
 
-// src/components/layout/MobileNav.jsx (UPDATE navItems)
-const navItems = [
-  { path: '/dashboard', label: 'Dashboard', Icon: DashboardIcon },
-  { path: '/expenses', label: 'Expenses', Icon: ExpenseIcon },  // ← renamed
-  { path: '/income', label: 'Income', Icon: IncomeIcon },
-  { path: '/budget', label: 'Budget', Icon: BudgetIcon },
-  { path: '/reports', label: 'Reports', Icon: ReportIcon },
-  { path: '/archives', label: 'Archives', Icon: ArchiveIcon },
-  { path: '/settings', label: 'Settings', Icon: SettingsIcon },
-];
-
 const MobileNav = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { logout, user } = useAuth();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { path: '/dashboard', label: t('nav.dashboard'), Icon: DashboardIcon },
+    { path: '/expenses', label: t('nav.expenses'), Icon: ExpenseIcon },
+    { path: '/income', label: t('nav.income'), Icon: IncomeIcon },
+    { path: '/budget', label: t('nav.budget'), Icon: BudgetIcon },
+    { path: '/reports', label: t('nav.reports'), Icon: ReportIcon },
+    { path: '/settings', label: t('nav.settings'), Icon: SettingsIcon },
+  ];
 
   return (
     <AnimatePresence>
@@ -37,7 +36,7 @@ const MobileNav = ({ isOpen, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-forest-950/30 backdrop-blur-sm z-50 lg:hidden"
+            className="fixed inset-0 bg-forest-950/40 backdrop-blur-sm z-50 lg:hidden"
             onClick={onClose}
           />
           <motion.div
@@ -45,32 +44,22 @@ const MobileNav = ({ isOpen, onClose }) => {
             animate={{ x: 0 }}
             exit={{ x: -280 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed left-0 top-0 bottom-0 w-72 bg-white z-50 lg:hidden shadow-xl flex flex-col"
+            className="fixed left-0 top-0 bottom-0 w-72 z-50 lg:hidden flex flex-col shadow-xl
+                       bg-white dark:bg-surface-card-dark theme-transition"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-5 border-b border-sage-100">
+            <div className="flex items-center justify-between px-5 py-5 border-b border-sage-100 dark:border-surface-border-dark">
               <div className="flex items-center gap-3">
                 <Logo size={32} />
-                <span className="text-lg font-roboto font-bold text-gradient-forest">Expenz</span>
+                <span className="font-poppins font-bold text-lg text-gradient-forest">Expenz</span>
               </div>
-              <button onClick={onClose} className="p-2 rounded-xl hover:bg-forest-50 text-sage-400">
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl hover:bg-forest-50 dark:hover:bg-forest-900/40
+                           text-sage-400 dark:text-sage-300 transition-colors"
+              >
                 <CloseIcon size={20} />
               </button>
-            </div>
-
-            {/* User card */}
-            <div className="mx-4 mt-4 p-3 rounded-xl bg-gradient-forest">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-                  <span className="text-white font-roboto font-bold text-sm">
-                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-roboto font-medium text-white truncate">{user?.name}</p>
-                  <p className="text-[10px] font-roboto text-white/60 truncate">{user?.email}</p>
-                </div>
-              </div>
             </div>
 
             {/* Navigation */}
@@ -80,8 +69,12 @@ const MobileNav = ({ isOpen, onClose }) => {
                 return (
                   <NavLink key={path} to={path} onClick={onClose} className="block">
                     <div className={`
-                      flex items-center gap-3 px-4 py-3 rounded-xl font-roboto text-sm font-medium transition-all
-                      ${isActive ? 'bg-forest-50 text-forest-700' : 'text-sage-500 hover:text-forest-700 hover:bg-forest-50/50'}
+                      flex items-center gap-3 px-4 py-3 rounded-xl
+                      font-inter text-sm font-medium transition-all
+                      ${isActive
+                        ? 'bg-forest-50 dark:bg-forest-900/40 text-forest-700 dark:text-forest-200'
+                        : 'text-sage-600 dark:text-sage-300 hover:bg-forest-50/60 dark:hover:bg-forest-900/20'
+                      }
                     `}>
                       <Icon size={20} active={isActive} />
                       <span>{label}</span>
@@ -91,14 +84,17 @@ const MobileNav = ({ isOpen, onClose }) => {
               })}
             </nav>
 
-            {/* Logout */}
-            <div className="p-3 border-t border-sage-100">
+            <div className="p-3 border-t border-sage-100 dark:border-surface-border-dark">
               <button
                 onClick={() => { logout(); onClose(); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl font-roboto text-sm font-medium text-sage-400 hover:text-red-500 hover:bg-red-50 transition-all w-full"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl
+                           font-inter text-sm font-medium
+                           text-sage-500 dark:text-sage-400
+                           hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30
+                           transition-all"
               >
                 <LogoutIcon size={20} />
-                <span>Sign Out</span>
+                <span>{t('nav.logout')}</span>
               </button>
             </div>
           </motion.div>

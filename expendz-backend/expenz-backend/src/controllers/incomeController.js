@@ -1,6 +1,5 @@
 // src/controllers/incomeController.js
 const Income = require('../models/Income');
-const Archive = require('../models/Archive');
 const { success, error } = require('../utils/apiResponse');
 
 /**
@@ -102,7 +101,7 @@ const updateIncome = async (req, res, next) => {
 
 /**
  * DELETE /api/income/:id
- * Soft delete - moves to archive
+ * Hard delete (archive removed)
  */
 const deleteIncome = async (req, res, next) => {
   try {
@@ -112,22 +111,8 @@ const deleteIncome = async (req, res, next) => {
     });
 
     if (!income) return error(res, 404, 'Income record not found');
-
-    // Move to archive
-    await Archive.create({
-      user: req.user._id,
-      originalModel: 'Income',
-      source: income.source,
-      description: income.description,
-      amount: income.amount,
-      category: income.category,
-      type: income.type,
-      date: income.date,
-      recurrence: income.recurrence,
-    });
-
     await income.deleteOne();
-    return success(res, 200, 'Income moved to archive');
+    return success(res, 200, 'Income deleted successfully');
   } catch (err) {
     next(err);
   }

@@ -20,10 +20,14 @@ const budgetSchema = new mongoose.Schema(
       required: [true, 'Budget amount is required'],
       min: [0.01, 'Amount must be greater than 0'],
     },
-    period: {
+    // NEW: Month format YYYY-MM (e.g., "2025-01")
+    month: {
       type: String,
-      enum: ['weekly', 'monthly', 'yearly'],
-      default: 'monthly',
+      required: true,
+      default: () => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      },
     },
     incomeSource: {
       type: String,
@@ -34,7 +38,7 @@ const budgetSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Make sure user can't have duplicate category budgets
-budgetSchema.index({ user: 1, category: 1 }, { unique: true });
+// One budget per category per month per user
+budgetSchema.index({ user: 1, category: 1, month: 1 }, { unique: true });
 
 module.exports = mongoose.model('Budget', budgetSchema);
