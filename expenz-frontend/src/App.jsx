@@ -1,6 +1,7 @@
 // src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -19,6 +20,32 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import AppLayout from './components/layout/AppLayout';
 
+// ─── Page title map ─────────────────────────────────────────
+const PAGE_TITLES = {
+  '/login': 'Login — Expenz',
+  '/register': 'Create Account — Expenz',
+  '/dashboard': 'Dashboard — Expenz',
+  '/expenses': 'Expenses — Expenz',
+  '/income': 'Income — Expenz',
+  '/budget': 'Budget — Expenz',
+  '/reports': 'Reports — Expenz',
+  '/settings': 'Settings — Expenz',
+};
+
+const DEFAULT_TITLE = 'Expenz - Smart Finance Manager';
+
+// ─── Document title hook ────────────────────────────────────
+const useDocumentTitle = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    const title = PAGE_TITLES[path] || DEFAULT_TITLE;
+    document.title = title;
+  }, [location.pathname]);
+};
+
+// ─── Route guards ───────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -33,12 +60,36 @@ const PublicRoute = ({ children }) => {
   return children;
 };
 
+// ─── Router with title watcher ──────────────────────────────
 function AppRoutes() {
+  useDocumentTitle();
+
   return (
     <Routes>
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="expenses" element={<Expenses />} />
@@ -52,6 +103,7 @@ function AppRoutes() {
   );
 }
 
+// ─── App root ───────────────────────────────────────────────
 function App() {
   return (
     <Router>
