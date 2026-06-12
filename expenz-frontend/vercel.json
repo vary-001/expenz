@@ -1,4 +1,4 @@
-// vercel.json  (full version — place in project ROOT)
+
 {
   "rewrites": [
     {
