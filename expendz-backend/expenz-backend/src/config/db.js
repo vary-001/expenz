@@ -5,6 +5,7 @@ const env = require('./env');
 const connectDB = async () => {
   try {
     // Debug: Show partial URI (hide password)
+        // Debug: Show partial URI (hide password)
     const uri = env.MONGO_URI;
     const maskedUri = uri.replace(/:([^@]+)@/, ':****@');
     console.log('🔌 Connecting to MongoDB...');
@@ -12,11 +13,11 @@ const connectDB = async () => {
 
     // Validate URI format
     if (!uri || !uri.startsWith('mongodb')) {
-      throw new Error('Invalid MongoDB URI. Must start with mongodb:// or mongodb+srv://');
+      throw new Error(`Invalid MongoDB URI. Must start with mongodb:// or mongodb+srv:// (Detected: "${uri.substring(0, 15)}...")`);
     }
 
-    if (uri.includes('""') || uri.includes('<') || uri.includes('>')) {
-      throw new Error('MongoDB URI contains placeholder text or empty quotes. Please replace <db_password> with your actual password.');
+    if (uri.includes('<') || uri.includes('>')) {
+      throw new Error('MongoDB URI contains placeholder text like <db_password>. Please replace it with your actual password.');
     }
 
     const conn = await mongoose.connect(uri, {
