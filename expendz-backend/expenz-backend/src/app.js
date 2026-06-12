@@ -1,3 +1,4 @@
+// src/app.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -18,36 +19,31 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 const app = express();
 
 // ─── SECURITY ───
-// Helmet helps secure your app by setting various HTTP headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-// ─── CORS ───
-// Configured to allow cross-origin requests, essential for frontend-to-backend communication
+// ─── CORS (allow browser & Postman to call our API) ───
 app.use(cors({
-  origin: '*', 
+  origin: '*', // Allow all origins for development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
 }));
 
-// Handle preflight requests
+// Handle preflight requests for all routes
 app.options('*', cors());
 
 // ─── BODY PARSER ───
-// Increased limit to 10mb to handle potential image/data uploads
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ─── LOGGING ───
-// Only use morgan in development to keep production logs clean
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
 // ─── HEALTH CHECK ───
-// This endpoint is what cloud platforms use to verify your server is alive
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -60,6 +56,7 @@ app.get('/api/health', (req, res) => {
 
 // ─── API ROUTES ───
 app.use('/api/auth', authRoutes);
+
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/budgets', budgetRoutes);
@@ -74,7 +71,7 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
-      transactions: '/api/expenses', // Corrected path
+      transactions: '/api/transactions',
       income: '/api/income',
       budgets: '/api/budgets',
       reports: '/api/reports',
