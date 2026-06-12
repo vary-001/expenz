@@ -36,19 +36,23 @@ const log = {
 };
 
 // ─── Safe header setter ───────────────────────────────────────────────────────
-// Guards every res.setHeader call that happens asynchronously (finish / close
-// events) so we never hit ERR_HTTP_HEADERS_SENT.
 const safeSetHeader = (res, name, value) => {
   try {
-    // headersSent  → response is already flushed to the socket
-    // writableEnded → stream has been ended (res.end() was called)
     if (!res.headersSent && !res.writableEnded) {
       res.setHeader(name, value);
     }
-  } catch (_) {
-    // swallow — nothing useful we can do at this point
-  }
+  } catch (_) { /* swallow */ }
 };
+
+// ─── Utility ──────────────────────────────────────────────────────────────────
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+}
+
+// ─── Normalise an origin string ───────────────────────────────────────────────
+// Strips trailing slashes so 'https://example.com/' and
+// 'https://example.com' both match the same entry.
+const normaliseOrigin = (o) => (typeof o === 'string' ? o.replace(/\/+$/, '') : o);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 const app = express();
@@ -72,43 +76,71 @@ app.use(helmet({
 
 // ══════════════════════════════════════════════════════════════════════════════
 // 2. CORS
+//
+// ROOT CAUSE of the original error:
+//   'https://expenztracker.vercel.app/' had a trailing slash — browsers send
+//   the origin WITHOUT a trailing slash, so the === check always failed.
+//
+// Fix: normalise every entry with normaliseOrigin() before storing.
 // ══════════════════════════════════════════════════════════════════════════════
 const ALLOWED_ORIGINS = (() => {
   const base = [
     env.CLIENT_URL,
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://expenztracker.vercel.app/',
     'http://localhost:4173',
-  ].filter(Boolean);
+    // ✅ NO trailing slash — browsers omit it in the Origin header
+    'https://expenztracker.vercel.app',
+  ].filter(Boolean).map(normaliseOrigin);
 
   const extra = (process.env.EXTRA_ORIGINS || '')
-    .split(',').map((o) => o.trim()).filter(Boolean);
+    .split(',')
+    .map((o) => normaliseOrigin(o.trim()))
+    .filter(Boolean);
 
-  return [...new Set([...base, ...extra])];
+  const all = [...new Set([...base, ...extra])];
+  log.info('CORS allowed origins', { origins: all });
+  return all;
 })();
 
 const corsOptions = {
   origin: (origin, cb) => {
+    // No origin = same-origin request, curl, Postman, mobile app → allow
     if (!origin) return cb(null, true);
+
+    // Normalise browser-sent origin before comparing
+    const normOrigin = normaliseOrigin(origin);
+
     if (env.IS_DEVELOPMENT) {
-      if (!ALLOWED_ORIGINS.includes(origin)) {
-        log.warn('CORS — unknown origin allowed in dev', { origin });
+      if (!ALLOWED_ORIGINS.includes(normOrigin)) {
+        log.warn('CORS — unlisted origin allowed in dev', { origin: normOrigin });
       }
       return cb(null, true);
     }
-    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-    log.warn('CORS — blocked unlisted origin', { origin });
-    return cb(Object.assign(new Error(`CORS: origin "${origin}" not allowed`), { status: 403 }));
+
+    if (ALLOWED_ORIGINS.includes(normOrigin)) return cb(null, true);
+
+    log.warn('CORS — blocked unlisted origin', { origin: normOrigin, allowed: ALLOWED_ORIGINS });
+    return cb(
+      Object.assign(new Error(`CORS: origin "${normOrigin}" not allowed`), { status: 403 })
+    );
   },
   methods        : ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders : ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Api-Version'],
   exposedHeaders : ['X-Request-Id', 'X-Response-Time'],
+  // ✅ Must be true when the frontend sends Authorization header or cookies
   credentials    : true,
+  // Cache preflight for 24 h — reduces OPTIONS round-trips
   maxAge         : 86_400,
+  optionsSuccessStatus: 204,
 };
 
+// ── Apply CORS BEFORE every other middleware / route ─────────────────────────
 app.use(cors(corsOptions));
+
+// ── Explicitly handle every OPTIONS preflight ─────────────────────────────────
+// Some browsers send a preflight even for simple requests when
+// Authorization is present, so we must respond to OPTIONS on all routes.
 app.options('*', cors(corsOptions));
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -122,31 +154,20 @@ app.use(express.json({
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 4. REQUEST ENRICHMENT  ← ROOT CAUSE FIX IS HERE
-//
-//    The previous version attached a `res.on('finish')` listener to set
-//    X-Response-Time.  By the time 'finish' fires the response is already
-//    sent, so res.setHeader() throws ERR_HTTP_HEADERS_SENT and the
-//    uncaughtException handler kills the process.
-//
-//    Fix: record timing with process.hrtime.bigint() at request start and
-//    write the header BEFORE the body is flushed by overriding res.end().
-//    res.end() is the last thing Express calls — headers are still open at
-//    that point — so it is always safe to set a header there.
+// 4. REQUEST ENRICHMENT
+//    Writes X-Response-Time by wrapping res.end() — headers are still
+//    open at that exact moment so it is always safe.
 // ══════════════════════════════════════════════════════════════════════════════
 app.use((req, res, next) => {
   // ── Request ID ────────────────────────────────────────────────────────────
   const reqId = req.headers['x-request-id'] || generateId();
-  req.id       = reqId;
-  // Safe to set here — response hasn't started yet
+  req.id = reqId;
   res.setHeader('X-Request-Id', reqId);
 
   // ── Hi-res start time ─────────────────────────────────────────────────────
   const startNs = process.hrtime.bigint();
 
-  // ── Patch res.end to inject timing header BEFORE the response closes ──────
-  // We wrap the original res.end so we run synchronously before the socket
-  // is flushed.  Headers are still writable at this exact moment.
+  // ── Patch res.end to inject timing header BEFORE the socket flushes ───────
   const _end = res.end.bind(res);
   res.end = function patchedEnd(...args) {
     const ms = (Number(process.hrtime.bigint() - startNs) / 1e6).toFixed(2);
@@ -158,15 +179,14 @@ app.use((req, res, next) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 5. REQUEST LOGGER  (built-in, replaces morgan)
+// 5. REQUEST LOGGER
 // ══════════════════════════════════════════════════════════════════════════════
 app.use((req, res, next) => {
-  // Skip noisy health-check polling in production logs
+  // Suppress health-check noise in production
   if (env.IS_PRODUCTION && req.url === '/api/health') return next();
 
   const startNs = process.hrtime.bigint();
 
-  // Use 'finish' only for LOGGING — never for setting headers
   res.on('finish', () => {
     const ms  = (Number(process.hrtime.bigint() - startNs) / 1e6).toFixed(2);
     const sc  = res.statusCode;
@@ -175,30 +195,33 @@ app.use((req, res, next) => {
     const line = [
       dim(new Date().toISOString()),
       magenta(req.method.padEnd(7)),
-      bold(req.originalUrl.padEnd(40)),
+      bold((req.originalUrl || req.url).padEnd(40)),
       col(String(sc)),
       dim(`${ms}ms`),
       dim(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '-'),
       dim(req.id),
     ].join('  ');
 
-    if (sc >= 500) console.error(line);
+    if (sc >= 500)      console.error(line);
     else if (sc >= 400) console.warn(line);
-    else console.log(line);
+    else                console.log(line);
   });
 
   next();
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 6. RATE LIMITER  (built-in, Map-backed)
+// 6. RATE LIMITER  (Map-backed, no external dependency)
 // ══════════════════════════════════════════════════════════════════════════════
 const _rlWindows = new Map();
 
 const rateLimiter = ({
   windowMs = env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1_000,
   max      = env.RATE_LIMIT_MAX       ?? 100,
-  keyFn    = (req) => req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown',
+  keyFn    = (req) =>
+    req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+    req.socket?.remoteAddress                            ||
+    'unknown',
 } = {}) => (req, res, next) => {
   const key = keyFn(req);
   const now = Date.now();
@@ -212,18 +235,18 @@ const rateLimiter = ({
   slot.count++;
   const remaining = Math.max(0, max - slot.count);
 
-  // Headers are safe here — we're in the middleware pipeline, not in 'finish'
   res.setHeader('X-RateLimit-Limit',     String(max));
   res.setHeader('X-RateLimit-Remaining', String(remaining));
   res.setHeader('X-RateLimit-Reset',     String(Math.ceil(slot.resetAt / 1000)));
 
   if (slot.count > max) {
+    const retryAfterSec = Math.ceil((slot.resetAt - now) / 1000);
     log.warn('Rate limit exceeded', { key, count: slot.count, max });
-    res.setHeader('Retry-After', String(Math.ceil((slot.resetAt - now) / 1000)));
+    res.setHeader('Retry-After', String(retryAfterSec));
     return res.status(429).json({
       success      : false,
       error        : 'Too Many Requests',
-      message      : `Rate limit exceeded. Try again in ${Math.ceil((slot.resetAt - now) / 1000)}s.`,
+      message      : `Rate limit exceeded. Try again in ${retryAfterSec}s.`,
       retryAfterMs : slot.resetAt - now,
     });
   }
@@ -231,7 +254,7 @@ const rateLimiter = ({
   next();
 };
 
-// Purge stale windows every 10 min
+// Purge stale windows every 10 min to avoid memory leak
 setInterval(() => {
   const now = Date.now();
   for (const [k, v] of _rlWindows) {
@@ -242,15 +265,15 @@ setInterval(() => {
 app.use(rateLimiter());
 
 const authLimiter = rateLimiter({
-  max  : 20,
-  keyFn: (req) => `auth:${req.headers['x-forwarded-for'] || req.socket?.remoteAddress}`,
+  windowMs: 15 * 60 * 1_000,
+  max     : 20,
+  keyFn   : (req) =>
+    `auth:${req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress}`,
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
 // 7. JSON PARSE ERROR GUARD
 // ══════════════════════════════════════════════════════════════════════════════
-// express.json() calls next(err) when the body is malformed.
-// This 4-argument middleware catches it before the global error handler.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
@@ -266,19 +289,18 @@ app.use((err, req, res, next) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 8. ROOT
+// 8. SYSTEM ROUTES  (health, metrics, ping — no auth required)
 // ══════════════════════════════════════════════════════════════════════════════
 app.get('/', (_req, res) => {
   res.status(200).json({
-    name       : app.locals.name,
-    version    : app.locals.version,
-    status     : 'operational',
-    environment: env.NODE_ENV,
-    endpoints  : {
+    name        : app.locals.name,
+    version     : app.locals.version,
+    status      : 'operational',
+    environment : env.NODE_ENV,
+    uptimeMs    : Date.now() - app.locals.startedAt,
+    endpoints   : {
       health   : '/api/health',
       metrics  : '/api/metrics',
-      routes   : '/api/routes',
-      report   : '/api/report',
       ping     : '/api/ping',
       auth     : '/api/auth',
       expenses : '/api/expenses',
@@ -287,6 +309,34 @@ app.get('/', (_req, res) => {
       reports  : '/api/reports',
       dashboard: '/api/dashboard',
     },
+  });
+});
+
+// ── Health — used by keep-alive pinger and uptime monitors ────────────────────
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({
+    status  : 'ok',
+    uptime  : process.uptime(),
+    memory  : process.memoryUsage(),
+    ts      : new Date().toISOString(),
+  });
+});
+
+// ── Ping — lightest possible response for keep-alive ─────────────────────────
+app.get('/api/ping', (_req, res) => res.status(200).json({ pong: true }));
+
+// ── Metrics ───────────────────────────────────────────────────────────────────
+app.get('/api/metrics', (_req, res) => {
+  const mem = process.memoryUsage();
+  res.status(200).json({
+    uptimeMs     : Date.now() - app.locals.startedAt,
+    uptimeSec    : process.uptime(),
+    memHeapUsed  : mem.heapUsed,
+    memHeapTotal : mem.heapTotal,
+    memRss       : mem.rss,
+    rateLimitKeys: _rlWindows.size,
+    nodeVersion  : process.version,
+    env          : env.NODE_ENV,
   });
 });
 
@@ -303,7 +353,7 @@ app.use(`${API}/reports`,                 reportRoutes);
 app.use(`${API}/dashboard`,               dashboardRoutes);
 
 log.info('Mounted API routes', {
-  routes: ['auth','expenses','income','budgets','reports','dashboard'],
+  routes: ['auth', 'expenses', 'income', 'budgets', 'reports', 'dashboard'],
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -311,10 +361,5 @@ log.info('Mounted API routes', {
 // ══════════════════════════════════════════════════════════════════════════════
 app.use(notFound);
 app.use(errorHandler);
-
-// ─── Utility ──────────────────────────────────────────────────────────────────
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
-}
 
 module.exports = app;
