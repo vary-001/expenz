@@ -78,6 +78,7 @@ const ALLOWED_ORIGINS = (() => {
     env.CLIENT_URL,
     'http://localhost:3000',
     'http://localhost:5173',
+    'https://expenztracker.vercel.app/',
     'http://localhost:4173',
   ].filter(Boolean);
 
